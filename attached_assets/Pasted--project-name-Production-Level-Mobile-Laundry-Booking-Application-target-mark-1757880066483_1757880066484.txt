@@ -1,0 +1,155 @@
+{
+  "project": {
+    "name": "Production-Level Mobile Laundry Booking Application",
+    "target_market": "US Customers",
+    "development_team": "Indian Development Team",
+    "scalability": "50,000+ daily users with Firebase auto-scaling",
+    "compliance": ["CCPA", "PCI DSS", "TCPA"],
+    "tech_stack": {
+      "frontend": "React Native (Expo for production builds)",
+      "backend": "Firebase (Firestore, Cloud Functions, Hosting, FCM)",
+      "auth": "Firebase Auth (Email/Password, Google/Apple Sign-In, MFA)",
+      "database": "Firebase Firestore (NoSQL, indexed queries)",
+      "payments": "Stripe API (US Cards, ACH, Apple Pay, Google Pay)",
+      "notifications": ["Firebase Cloud Messaging", "Twilio SMS", "Email"],
+      "maps": "Google Maps API (Geocoding, Directions, Radius mapping)",
+      "analytics": ["Google Analytics", "Firebase Crashlytics"],
+      "caching": "Optional Redis for high-volume optimizations",
+      "deployment": ["Firebase Hosting", "Expo EAS for iOS/Android"]
+    },
+    "architecture_flow": {
+      "diagram_text": [
+        " [Mobile App: React Native] ",
+        "        | ",
+        "        v ",
+        " [Firebase Auth] --(Role-based Access: Customer/Admin) ",
+        "        | ",
+        "        v ",
+        " [Firestore DB] <--> [Cloud Functions Backend] ",
+        "        | ",
+        "   ------------------------- ",
+        "   |           |            | ",
+        " [Stripe API] [Twilio SMS] [Google Maps API] ",
+        "   |           |            | ",
+        "   ------------------------- ",
+        "        | ",
+        "        v ",
+        " [Admin Dashboard & Customer App with Real-time Sync] ",
+        "        | ",
+        "        v ",
+        " [Analytics + Crashlytics Monitoring + Auto-scaling]"
+      ]
+    },
+    "pages_and_features": {
+      "authentication": {
+        "customer_login": ["Email/Password", "Google Sign-In", "Apple Sign-In", "MFA"],
+        "admin_login": ["Secure Login", "PIN/OTP verification"],
+        "security": "Encrypted sessions, role-based access"
+      },
+      "registration": {
+        "user_profile": ["Name", "Address (ZIP code)", "Phone", "Email"],
+        "validation": "US ZIP codes and location-based validation"
+      },
+      "customer_dashboard": {
+        "modules": [
+          "Home screen with services (Wash, Wash+Iron, Dry Cleaning)",
+          "Order placement with pricing calculator",
+          "Pickup & Delivery scheduling",
+          "Order history and status tracking",
+          "Profile management",
+          "Notifications center"
+        ]
+      },
+      "admin_dashboard": {
+        "modules": [
+          "Order management (filter by status, date, location)",
+          "Bulk updates (Pending → In Progress → Delivered)",
+          "Revenue analytics (daily/weekly, INR conversion for reporting)",
+          "Customer list and activity logs",
+          "Real-time order updates via Firestore"
+        ]
+      },
+      "order_module": {
+        "features": [
+          "Cloth quantity selection (per kg/item count)",
+          "Photo upload of items (Firebase Storage)",
+          "Dynamic cost estimation",
+          "Payment gateway integration with Stripe",
+          "PIN/OTP verification before confirmation"
+        ]
+      },
+      "location_module": {
+        "features": [
+          "1.5 km service radius validation",
+          "Google Maps for route optimization",
+          "Real-time driver tracking",
+          "ZIP code-based service restriction"
+        ]
+      },
+      "notifications_module": {
+        "features": [
+          "Push notifications (order status, promotions)",
+          "SMS alerts (Twilio, TCPA-compliant)",
+          "Email updates (order summary, invoices)",
+          "Notification logs in Firestore"
+        ]
+      },
+      "payment_module": {
+        "features": [
+          "Stripe integration (Cards, ACH, Apple/Google Pay)",
+          "PCI DSS compliance",
+          "Automated invoicing and refunds",
+          "Fraud detection via Stripe Radar"
+        ]
+      },
+      "analytics_monitoring": {
+        "tools": [
+          "Google Analytics for user behavior",
+          "Firebase Crashlytics for error monitoring",
+          "Audit logs for security events",
+          "Load testing and performance monitoring"
+        ]
+      }
+    },
+    "risk_assessment": {
+      "api_rate_limits": "Implement retry logic, Redis caching for optimization",
+      "security": "Firebase security rules, encryption, data deletion compliance",
+      "scalability": "Auto-scaling with Firebase Blaze plan",
+      "uptime": "99.9% reliability with CI/CD pipelines"
+    },
+    "deliverables": {
+      "mobile_app": "React Native app for iOS & Android",
+      "admin_panel": "Dashboard for order and revenue management",
+      "integrations": "Stripe, Twilio, Google Maps APIs",
+      "analytics": "User behavior reports, crash monitoring",
+      "deployment": "App Store & Play Store release-ready build"
+    },
+    "rate_card": {
+      "project_cost": "₹1,00,000",
+      "recurring_costs": {
+        "firebase_stripe_setup": "₹5,000/month",
+        "resource_cost": "₹30,000/year"
+      },
+      "exclusions": [
+        "Stripe per transaction fee (2.9% + $0.30)",
+        "Twilio SMS charges (~$0.0075/message)",
+        "Firebase Blaze overages (storage, bandwidth)"
+      ]
+    },
+    "terms_conditions": {
+      "payment_terms": "40% upfront, 30% mid-project, 30% upon deployment",
+      "scope_changes": "Additional features may incur extra charges",
+      "client_responsibility": [
+        "US Stripe account setup (EIN, Bank)",
+        "API key provisions for Stripe/Twilio/Google"
+      ],
+      "timeline": "Depends on prompt approvals and compliance setup"
+    },
+    "contact": {
+      "company_name": "Your Company Name",
+      "email": "your.email@example.com",
+      "phone": "+91-XXX-XXX-XXXX",
+      "website": "www.yourcompany.com"
+    }
+  }
+}
