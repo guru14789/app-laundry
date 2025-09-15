@@ -24,14 +24,40 @@ if (!process.env.STRIPE_SECRET_KEY) {
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Middleware to verify Firebase token
+  // Middleware to verify tokens (Firebase or development)
   const verifyToken = async (req: any, res: any, next: any) => {
     try {
-      const token = req.headers.authorization?.split('Bearer ')[1];
+      const authHeader = req.headers.authorization;
+      if (!authHeader) {
+        return res.status(401).json({ message: 'No token provided' });
+      }
+
+      const token = authHeader.split('Bearer ')[1];
       if (!token) {
         return res.status(401).json({ message: 'No token provided' });
       }
 
+      // Handle development tokens
+      if (token.startsWith('dev-') && process.env.NODE_ENV === 'development') {
+        try {
+          const payload = JSON.parse(Buffer.from(token.slice(4), 'base64').toString());
+          if (payload.exp < Date.now()) {
+            return res.status(401).json({ message: 'Token expired' });
+          }
+          
+          const user = await storage.getUser(payload.userId);
+          if (!user) {
+            return res.status(401).json({ message: 'User not found' });
+          }
+          
+          req.user = user;
+          return next();
+        } catch (error) {
+          return res.status(401).json({ message: 'Invalid development token' });
+        }
+      }
+
+      // Handle Firebase tokens
       const decodedToken = await admin.auth().verifyIdToken(token);
       let user = await storage.getUserByFirebaseUid(decodedToken.uid);
       
@@ -52,50 +78,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   };
 
+  // Health check endpoint
+  app.get('/api/health', (req, res) => {
+    res.json({ 
+      status: 'ok', 
+      environment: process.env.NODE_ENV,
+      features: {
+        devAuth: process.env.NODE_ENV === 'development',
+        firebase: true,
+        database: true,
+        stripe: true
+      }
+    });
+  });
+
   // Auth routes
   app.get('/api/me', verifyToken, (req: any, res) => {
     res.json(req.user);
   });
 
-  // Test user creation endpoint (development only)
-  app.post('/api/create-test-user', async (req, res) => {
+  // Development authentication system (bypasses Firebase)
+  const testCredentials = {
+    email: 'admin@test.com',
+    password: 'admin123',
+    user: {
+      email: 'admin@test.com',
+      username: 'Admin User',
+      role: 'admin',
+      firebaseUid: 'dev-admin-123',
+    }
+  };
+
+  // Development login endpoint
+  app.post('/api/dev-login', async (req, res) => {
     try {
       // Only allow in development
       if (process.env.NODE_ENV !== 'development') {
-        return res.status(403).json({ message: 'Test user creation only available in development' });
+        return res.status(403).json({ message: 'Development login only available in development mode' });
       }
 
-      const testUser = {
-        email: 'test@example.com',
-        username: 'Test User',
-        role: 'admin',
-        firebaseUid: 'test-user-123',
-      };
-
-      // Check if test user already exists
-      const existingUser = await storage.getUserByEmail(testUser.email);
-      if (existingUser) {
-        return res.json({ 
-          message: 'Test user already exists',
-          user: existingUser,
-          credentials: {
-            email: 'test@example.com',
-            note: 'Use Firebase Auth or create a custom login mechanism'
-          }
-        });
+      const { email, password } = req.body;
+      
+      // Check credentials
+      if (email !== testCredentials.email || password !== testCredentials.password) {
+        return res.status(401).json({ message: 'Invalid email or password' });
       }
 
-      const user = await storage.createUser(testUser);
-      res.status(201).json({ 
-        message: 'Test user created successfully',
-        user,
-        credentials: {
-          email: 'test@example.com',
-          note: 'Use Firebase Auth or create a custom login mechanism'
-        }
+      // Create or get test user
+      let user = await storage.getUserByEmail(testCredentials.user.email);
+      if (!user) {
+        user = await storage.createUser(testCredentials.user);
+      }
+
+      // Create a simple token (in production, use proper JWT)
+      const token = Buffer.from(JSON.stringify({ 
+        userId: user.id, 
+        email: user.email, 
+        role: user.role,
+        exp: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
+      })).toString('base64');
+
+      res.json({
+        message: 'Login successful',
+        token: `dev-${token}`,
+        user: user,
+        instructions: 'Use this token in Authorization header as: Bearer dev-[token]'
       });
     } catch (error: any) {
-      res.status(500).json({ message: 'Error creating test user: ' + error.message });
+      res.status(500).json({ message: 'Login error: ' + error.message });
     }
   });
 
