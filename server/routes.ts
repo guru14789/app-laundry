@@ -57,6 +57,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(req.user);
   });
 
+  // Test user creation endpoint (development only)
+  app.post('/api/create-test-user', async (req, res) => {
+    try {
+      // Only allow in development
+      if (process.env.NODE_ENV !== 'development') {
+        return res.status(403).json({ message: 'Test user creation only available in development' });
+      }
+
+      const testUser = {
+        email: 'test@example.com',
+        username: 'Test User',
+        role: 'admin',
+        firebaseUid: 'test-user-123',
+      };
+
+      // Check if test user already exists
+      const existingUser = await storage.getUserByEmail(testUser.email);
+      if (existingUser) {
+        return res.json({ 
+          message: 'Test user already exists',
+          user: existingUser,
+          credentials: {
+            email: 'test@example.com',
+            note: 'Use Firebase Auth or create a custom login mechanism'
+          }
+        });
+      }
+
+      const user = await storage.createUser(testUser);
+      res.status(201).json({ 
+        message: 'Test user created successfully',
+        user,
+        credentials: {
+          email: 'test@example.com',
+          note: 'Use Firebase Auth or create a custom login mechanism'
+        }
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: 'Error creating test user: ' + error.message });
+    }
+  });
+
   // Services routes
   app.get('/api/services', async (req, res) => {
     try {
