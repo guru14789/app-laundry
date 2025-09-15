@@ -11,7 +11,9 @@ export default function OrderPage() {
   const { user, loading } = useAuth();
   const [, navigate] = useLocation();
   const { services, isLoading: servicesLoading } = useServices();
-  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     if (!loading && !user) {
@@ -22,7 +24,7 @@ export default function OrderPage() {
   useEffect(() => {
     // Get service ID from URL params
     const params = new URLSearchParams(window.location.search);
-    const serviceId = params.get('serviceId');
+    const serviceId = params.get("serviceId");
     if (serviceId) {
       setSelectedServiceId(serviceId);
     }
@@ -44,16 +46,18 @@ export default function OrderPage() {
         <div className="min-h-screen bg-background">
           <div className="p-6">
             <div className="flex items-center mb-6">
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 className="w-10 h-10 rounded-full bg-muted mr-4"
                 onClick={() => navigate("/dashboard")}
                 data-testid="button-back"
               >
                 <ArrowLeft size={20} />
               </Button>
-              <h2 className="text-2xl font-bold text-foreground">Select a Service</h2>
+              <h2 className="text-2xl font-bold text-foreground">
+                Select a Service
+              </h2>
             </div>
             <p className="text-muted-foreground text-center">
               Please select a service from the dashboard to place an order.
@@ -66,10 +70,12 @@ export default function OrderPage() {
 
   return (
     <div className="screen-container">
-      {/* Status Bar */}
+      {/* Status Bar - Updated to IST time for India test */}
       <div className="status-bar">
-        <span>9:41</span>
-        <span>LaundryPro</span>
+        <span>08:30</span>{" "}
+        {/* Updated to a realistic IST time (e.g., 08:30 AM IST, Sep 15, 2025) */}
+        <span>LaundryPro India Test</span>{" "}
+        {/* Updated app name for test context */}
         <div className="flex items-center gap-1">
           <i className="fas fa-signal text-sm"></i>
           <i className="fas fa-wifi text-sm"></i>
@@ -82,9 +88,9 @@ export default function OrderPage() {
         <div className="p-6 pb-28">
           {/* Header */}
           <div className="flex items-center mb-6">
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               className="w-10 h-10 rounded-full bg-muted mr-4"
               onClick={() => navigate("/dashboard")}
               data-testid="button-back"
