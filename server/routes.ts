@@ -4,6 +4,7 @@ import Stripe from "stripe";
 import { storage } from "./storage";
 import { insertOrderSchema, insertServiceSchema } from "@shared/schema";
 import admin from "firebase-admin";
+import { z } from "zod";
 
 // Initialize Firebase Admin SDK
 if (!admin.apps.length) {
@@ -20,9 +21,7 @@ if (!admin.apps.length) {
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
 }
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2025-08-27.basil",
-});
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Middleware to verify Firebase token
@@ -145,16 +144,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Payment validation schema
+  const createPaymentIntentSchema = z.object({
+    amount: z.number().positive().min(0.01),
+    orderId: z.string().optional(),
+  });
+
   // Payment routes
   app.post('/api/create-payment-intent', verifyToken, async (req: any, res) => {
     try {
-      const { amount, orderId } = req.body;
+      const { amount, orderId } = createPaymentIntentSchema.parse(req.body);
       
       const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(amount * 100), // Convert to cents
         currency: 'usd',
         metadata: {
-          orderId,
+          orderId: orderId || '',
           userId: req.user.id,
         },
       });
